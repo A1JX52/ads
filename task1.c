@@ -1,58 +1,60 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
-int* eratosthenes(int* primes, int limit) {
-    // '0' is no prime number
-    for (int i = 1; i <= limit; i++) {
+void eratosthenes(char* primes, unsigned long n) {
+    for (unsigned long i = 2; i < n; i++) {
         primes[i] = 1;
     }
+    // sqrt reduces the number of required bits by a factor of 2
+    unsigned int limit = ceil(sqrt(n));
 
-    // multiples of deleted numbers can be ignored in loop
-    for (int i = 2; i <= limit; i++) {
+    for (unsigned long i = 2; i <= limit; i++) {
         if (primes[i]) {
-            for (int j = i + i; j <= limit; j += i) {
-                printf("setting %d to zero.\n", j);
+            // multiples of prime numbers can be ignored
+            for (unsigned long j = i + i; j < n; j += i) {
                 primes[j] = 0;
             }
         }
-        printf("next\n");
     }
-    return primes;
 }
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        printf("Usage: task1 NUMBER\n");
+        printf("usage: ./task1 NUMBER\n");
         return 1;
     }
-    int num = atoi(argv[1]);
-    printf("number %i entered.\n", num);
+    char* endptr;
+    errno = 0;
+    unsigned long num = strtoul(argv[1], &endptr, 10);
 
-    int limit = sqrt(num);
-    int* primes = malloc(limit * sizeof(int) + sizeof(int));
-    eratosthenes(primes, limit);
-    printf("\n");
-
-    for (int i = 0; i <= limit; i++) {
-        if (primes[i]) {
-            printf("%d is a prime number.\n", i);
-        }
+    if (errno == ERANGE) {
+        printf("too large number entered.\n");
+        return 1;
+    } else if (*endptr != '\0') {
+        printf("invalid number entered.\n");
+        return 1;
     }
-    printf("\n");
+    printf("number %lu entered.\n", num);
+    // make index equal to numeric value by including zero
+    unsigned long n = num + 1;
 
-    // limit rule only applies for composite numbers
-    for (int i = 0; i <= limit; i++) {
-        if (primes[i] && i == num) {
-            printf("%d is a prime number itself.\n", num);
-        }
+    char* primes = malloc(n * sizeof(char));
+    
+    if (primes == NULL) {
+        printf("memory allocation failed.\n");
+        return 1;
     }
+    eratosthenes(primes, n);
 
-    while (num > 1) {
-        for (int i = 2; i <= limit; i++) {
-            if (primes[i] && !(num % i)) {
-                printf("%d is a factor.\n", i);
-                num /= i;
+    unsigned long rem = num;
+
+    while (rem > 1) {
+        for (unsigned long i = 2; i < n; i++) {
+            if (primes[i] && !(rem % i)) {
+                printf("%lu is a factor.\n", i);
+                rem /= i;
                 break;
             }
         }
