@@ -49,12 +49,22 @@ int main(int argc, char* argv[]) {
     printf("N: %d\ns: %d\n", n, s);
 
     struct List* start = malloc(sizeof(struct List));
+
+    if (start == NULL) {
+        printf("memory allocation failed.\n");
+        return 1;
+    }
     start->value = 0;
 
     struct List* last = start;
 
     for (int i = 1; i < n; i++) {
         struct List* next = malloc(sizeof(struct List));
+
+        if (next == NULL) {
+            printf("memory allocation failed.\n");
+            return 1;
+        }
         next->value = i;
         last->next = next;
         last = next;
