@@ -7,7 +7,7 @@ struct List {
 };
 
 void removeNext(struct List* start) {
-    printf("removing %d..\n", start->next->value);
+    printf("rm %d..\n", start->next->value);
     struct List* newNext = start->next->next;
     free(start->next);
     start->next = newNext;
@@ -24,22 +24,26 @@ void print(struct List* start, int n) {
     printf("]\n");
 }
 
-struct List* josephus(struct List* start, int s) {
-    for (int i = 0; i < s - 1; i++) {
-        start = start->next;
+void josephus(struct List* start, int s) {
+    while (start->next != start) {
+        for (int i = 0; i < s - 1; i++) {
+            start = start->next;
+        }
+        removeNext(start);
     }
-    removeNext(start);
-    return start;
+    printf("result: %d\n", start->value);
+    free(start);
 }
 
 int main(int argc, char* argv[]) {
     int n = atoi(argv[1]);
 
     if (n < 1) {
-        printf("length has to be at least 1. terminating..\n");
-        return -1;
+        printf("length has to be at least 1.\n");
+        return 1;
     } else if (argc != 3) {
-        printf("invalid number of arguments. terminating..\n");
+        printf("usage: ./task2 N s\n");
+        return 1;
     }
     int s = atoi(argv[2]);
     printf("N: %d\ns: %d\n", n, s);
@@ -58,12 +62,6 @@ int main(int argc, char* argv[]) {
     last->next = start;
     print(start, n);
 
-    start = josephus(last, s);
-
-    while (start->next != start) {
-        start = josephus(start, s);
-    }
-    printf("result: %d\n", start->value);
-    free(start);
+    josephus(last, s);
     return 0;
 }
